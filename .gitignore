@@ -24,4 +24,5 @@ htmlcov/
 *,cover
 
 # Application
-flaskmongo_venv/*
+flaskmongo/*
+config.py
