@@ -84,7 +84,7 @@ from pymongo import MongoClient
 
 app = Flask(__name__)
 
-db = MongoClient('mongodb+srv://jqn:React0r2008@flaskmongocluster.w5g8r.mongodb.net/sample_airbnb?retryWrites=true&w=majority')
+db = MongoClient('mongodb+srv://username:password@cluster.w5g8r.mongodb.net/sample_airbnb?retryWrites=true&w=majority')
 
 
 from app import routes
