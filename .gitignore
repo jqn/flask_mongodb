@@ -26,3 +26,4 @@ htmlcov/
 # Application
 flaskmongo/*
 config.py
+instance/
