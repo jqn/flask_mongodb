@@ -8,3 +8,11 @@
 ### Features
 
 - Sentry Logs
+- Flask Logs
+
+### Branches
+
+- main
+- starter
+- feature/application-package
+- feature/application-factory
