@@ -1,7 +1,6 @@
 # app/auth/__init__.py
-
 from flask import Blueprint
 
 auth = Blueprint('auth', __name__)
 
-from . import views  # noqa
+from . import login, signup, social  # noqa
