@@ -1,13 +1,17 @@
 # app/auth/routes.py
 
+import os
+from flask import current_app, url_for, \
+    session, redirect
 from . import auth
 from .. import oauth
+from ..models import User
 
 
 @auth.route('/google/')
 def google():
     # Google Oauth Config
-    # Get client_id and client_secret from enviroment variables
+    # Get client_id and client_secret from environment variables
     # For developement purpose you can directly put it here
     GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
     GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
@@ -36,9 +40,10 @@ def google_auth():
 
 @auth.route('/facebook/')
 def facebook():
+    # for local testing use http://localhost:5000/auth/facebook/
     # Facebook Oauth Config
-    FACEBOOK_CLIENT_ID = os.environ.get('FACEBOOK_CLIENT_ID')
-    FACEBOOK_CLIENT_SECRET = os.environ.get('FACEBOOK_CLIENT_SECRET')
+    FACEBOOK_CLIENT_ID = current_app.config['FACEBOOK_APP_ID']
+    FACEBOOK_CLIENT_SECRET = current_app.config['FACEBOOK_APP_SECRET']
     oauth.register(
         name='facebook',
         client_id=FACEBOOK_CLIENT_ID,
@@ -50,7 +55,7 @@ def facebook():
         api_base_url='https://graph.facebook.com/',
         client_kwargs={'scope': 'email'},
     )
-    redirect_uri = url_for('facebook_auth', _external=True)
+    redirect_uri = url_for('auth.facebook_auth', _external=True)
     return oauth.facebook.authorize_redirect(redirect_uri)
 
 
@@ -60,5 +65,19 @@ def facebook_auth():
     resp = oauth.facebook.get(
         'https://graph.facebook.com/me?fields=id,name,email,picture{url}')
     profile = resp.json()
-    print("Facebook User ", profile)
+    print("Facebook User ", profile["picture"])
+
+    # DON'T DO IT IN PRODUCTION, SAVE INTO DB IN PRODUCTION
+    session['token'] = token
+    session['user'] = profile
+    user = User.objects(email=profile['email']).first()
+    print("user", user)
+    if not user:
+        print("user not in database")
+        user = User(name=profile['name'], email=profile['email'])
+        user.save()
+    else:
+        print('user already in database')
+        user.update(name=profile['name'])
+
     return redirect('/')

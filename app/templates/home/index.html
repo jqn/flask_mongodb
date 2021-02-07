@@ -4,6 +4,10 @@
   <title></title>
 </head>
 <body>
-<p>Hello world<p/>
+<h2>User Details:</h2>
+{% for key, value in user.items() %}
+<h3>Key: {{key}}</h3>
+<p>Value: {{value['data']}}</p>
+{% endfor %}
 </body>
 </html>

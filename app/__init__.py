@@ -4,21 +4,12 @@ from flask import Flask
 from pymongo import MongoClient
 from sentry_sdk.integrations.flask import FlaskIntegration
 from authlib.integrations.flask_client import OAuth
+from flask_mongoengine import MongoEngine
 
 # local imports
 from config import app_config
 
 oauth = OAuth()
-
-facebook = oauth.register("facebook",
-                          base_url="https://graph.facebook.com/",
-                          request_token_url=None,
-                          access_token_url="https://graph.facebook.com/oauth/access_token",
-                          authorize_url="https://www.facebook.com/dialog/oauth",
-                          request_token_params={
-                              "scope": "email, public_profile"},
-                          app_key='FACEBOOK'
-                          )
 
 # connect to database
 client = MongoClient(
@@ -28,11 +19,27 @@ client = MongoClient(
 # connect to gameDB database
 db = client.gameDB
 
+db_engine = MongoEngine()
+
 
 def create_app(config_name):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile("config.py")
+
+    # add facebook secrets to oauth
+    app.config['FACEBOOK_CLIENT_ID'] = app.config['FACEBOOK_APP_ID']
+    app.config['FACEBOOK_CLIENT_SECRET'] = app.config['FACEBOOK_APP_SECRET']
+
+    # mongodb connection
+    app.config['MONGODB_SETTINGS'] = {
+        'host': 'mongodb+srv://flaskmongo_user:React0r2008@triviacluster.jfsa8.mongodb.net/gamesTrivia?retryWrites=true&w=majority',
+        'connect': True,
+    }
+
+    # add facebook secrets to oauth
+    app.config['FACEBOOK_CLIENT_ID'] = app.config['FACEBOOK_APP_ID']
+    app.config['FACEBOOK_CLIENT_SECRET'] = app.config['FACEBOOK_APP_SECRET']
 
     # Initialize sentry
     sentry_sdk.init(
@@ -51,12 +58,10 @@ def create_app(config_name):
         # release="myapp@1.0.0",
     )
 
-    # add facebook secrets to oauth
-    app.config['FACEBOOK_CLIENT_ID'] = app.config['FACEBOOK_APP_ID']
-    app.config['FACEBOOK_CLIENT_SECRET'] = app.config['FACEBOOK_APP_SECRET']
-
     # initialize oauth
     oauth.init_app(app)
+    # initialize mongoengine
+    db_engine.init_app(app)
 
     from .api import api as api_blueprint
     app.register_blueprint(api_blueprint, url_prefix="/api")

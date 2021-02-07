@@ -1,7 +1,6 @@
 # app/home/routes.py
 
-from flask import render_template
-from flask_login import login_required
+from flask import render_template, session, jsonify
 
 from . import home
 
@@ -11,4 +10,5 @@ def homepage():
     """
     Render the homepage template on the / route
     """
-    return render_template('home/index.html', title="Welcome")
+    user = session.get('user', {})
+    return render_template('home/index.html', title="Welcome", user=user)
